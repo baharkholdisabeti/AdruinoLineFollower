@@ -1,0 +1,127 @@
+#define LDRpin A0 // pin where we connected the LDR and the resistor
+/* ARDUINO LINE FOLLOWER CODE
+ * Bahar, Tina, Jaclyn
+ * May 3, 2019
+ * CHANGES:
+ * person             date              changes
+ * Tina               May 3, 2019       initial creation of file
+ * Bahar              May 17, 2019      added movement and ldr value processing methods
+ */
+
+// GLOBAL VARIABLES
+
+int in1 = 13;
+int in2 = 12;
+
+// Motor B
+int in3 = 8;
+int in4 = 7;
+
+// PWM
+int aSpeed = 6;
+int bSpeed = 5;
+
+// LDR (Orientation)
+int orientationLDR = A0;
+
+//LED Light
+int led = 4;
+
+void demoOne() {
+  // Turn on motor A
+  digitalWrite(in1, HIGH);
+  digitalWrite(in2, LOW);
+  // Turn on motor B
+  digitalWrite(in3, HIGH);
+  digitalWrite(in4, LOW);
+  // Set speed to 200 out of possible range 0~255
+  analogWrite(aSpeed, 200);
+  // Set speed to 200 out of possible range 0~255
+  analogWrite(bSpeed, 200);
+  //delay(3000);
+  //LED
+  //Serial.println(analogRead(LDRpin));
+}
+
+// SETUP
+
+void setup() {
+  Serial.begin(9600); //sets serial port for communication
+  // PWM Pins
+  pinMode(aSpeed, OUTPUT);
+  pinMode(bSpeed, OUTPUT);
+  // Motor direction control
+  pinMode(in1, OUTPUT);
+  pinMode(in2, OUTPUT);
+  pinMode(in3, OUTPUT);
+  pinMode(in4, OUTPUT);
+  //LED
+  pinMode (led, OUTPUT);
+  // LDR Calibration
+  pinMode(orientationLDR, INPUT);
+  // LDRbn 
+  pinMode(A0, INPUT);
+  // turn on led, set up what numbers are black and white
+  digitalWrite(led, HIGH);
+  initializeLDR();
+}
+
+// initializes ldr black and white values
+void initializeLDR(){
+  
+}
+
+// GETS
+
+// prints LDR output on serial monitor
+void getLDR(){
+  Serial.println(analogRead(LDRpin));
+}
+
+// checks to see what colour (black or white) is in front of it
+// outputs 0 for white, 1 for black
+boolean checkEdge(){
+  
+}
+
+// MOVEMENT
+
+// moves car forward
+void moveForward(){
+   // Turn on motor A
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, HIGH);
+  // Turn on motor B
+  digitalWrite(in3, HIGH);
+  digitalWrite(in4, LOW);
+  // Set speed to 200 out of possible range 0~255
+  analogWrite(aSpeed, 200);
+  // Set speed to 200 out of possible range 0~255
+  analogWrite(bSpeed, 200);
+}
+
+// turn car until edge is found
+void findEdge(){
+  // Turn on motor A
+  digitalWrite(in1, HIGH);
+  digitalWrite(in2, LOW);
+  // Turn on motor B
+  digitalWrite(in3, HIGH);
+  digitalWrite(in4, LOW);
+  // Set speed to 200 out of possible range 0~255
+  analogWrite(aSpeed, 200);
+  // Set speed to 200 out of possible range 0~255
+  analogWrite(bSpeed, 200);
+}
+
+// MAIN
+
+void loop() {
+  getLDR();
+  if (checkEdge()){
+    moveForward();
+  }
+  else{
+    findEdge();
+  }
+}
