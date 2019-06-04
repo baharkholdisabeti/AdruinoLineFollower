@@ -26,22 +26,11 @@ int orientationLDR = A0;
 
 //LED Light
 int led = 4;
+//value for white
+int white=0;
 
-void demoOne() {
-  // Turn on motor A
-  digitalWrite(in1, HIGH);
-  digitalWrite(in2, LOW);
-  // Turn on motor B
-  digitalWrite(in3, HIGH);
-  digitalWrite(in4, LOW);
-  // Set speed to 200 out of possible range 0~255
-  analogWrite(aSpeed, 200);
-  // Set speed to 200 out of possible range 0~255
-  analogWrite(bSpeed, 200);
-  //delay(3000);
-  //LED
-  //Serial.println(analogRead(LDRpin));
-}
+int timePast = 0;
+int lastTime = 0;
 
 // SETUP
 
@@ -68,7 +57,11 @@ void setup() {
 
 // initializes ldr black and white values
 void initializeLDR(){
-  
+  int sum=0;
+  for (int x=0;x<20;x++){
+    sum+=analogRead(LDRpin);
+  }
+  white=sum/20;
 }
 
 // GETS
@@ -81,13 +74,16 @@ void getLDR(){
 // checks to see what colour (black or white) is in front of it
 // outputs 0 for white, 1 for black
 boolean checkEdge(){
-  
+  if (analogRead(LDRpin) < white+20) {
+    return 1;
+  }
+  return 0;
 }
 
 // MOVEMENT
 
-// moves car forward
-void moveForward(){
+// moves car left if senses black
+void moveLeft(){
    // Turn on motor A
   digitalWrite(in1, LOW);
   digitalWrite(in2, HIGH);
@@ -95,33 +91,61 @@ void moveForward(){
   digitalWrite(in3, HIGH);
   digitalWrite(in4, LOW);
   // Set speed to 200 out of possible range 0~255
-  analogWrite(aSpeed, 200);
+  analogWrite(aSpeed, 1);
   // Set speed to 200 out of possible range 0~255
-  analogWrite(bSpeed, 200);
+  analogWrite(bSpeed, 100);
 }
 
-// turn car until edge is found
-void findEdge(){
-  // Turn on motor A
-  digitalWrite(in1, HIGH);
-  digitalWrite(in2, LOW);
-  // Turn on motor B
-  digitalWrite(in3, HIGH);
-  digitalWrite(in4, LOW);
-  // Set speed to 200 out of possible range 0~255
-  analogWrite(aSpeed, 200);
-  // Set speed to 200 out of possible range 0~255
-  analogWrite(bSpeed, 200);
+// turn car right until edge is found
+void moveRight(){
+  if (timePast<700){
+    // Turn on motor A
+    digitalWrite(in1, LOW);
+    digitalWrite(in2, HIGH);
+    // Turn on motor B
+    digitalWrite(in3, HIGH);
+    digitalWrite(in4, LOW);
+    // Set speed to 200 out of possible range 0~255
+    analogWrite(aSpeed, 100);
+    // Set speed to 200 out of possible range 0~255
+    analogWrite(bSpeed, 1);
+  }
+  else if (timePast<1200){
+    // Turn on motor A
+    digitalWrite(in1, LOW);
+    digitalWrite(in2, HIGH);
+    // Turn on motor B
+    digitalWrite(in3, HIGH);
+    digitalWrite(in4, LOW);
+    // Set speed to 200 out of possible range 0~255
+    analogWrite(aSpeed, 100);
+    // Set speed to 200 out of possible range 0~255
+    analogWrite(bSpeed, 100);
+  }
+  else{       // if it's white for a long time, the path may be an L shape and the car has to turn on its own axis (both wheels move opposite sides)
+    // Turn on motor A
+    digitalWrite(in1, HIGH);
+    digitalWrite(in2, LOW);
+    // Turn on motor B
+    digitalWrite(in3, HIGH);
+    digitalWrite(in4, LOW);
+    // Set speed to 200 out of possible range 0~255
+    analogWrite(aSpeed, 100);
+    // Set speed to 200 out of possible range 0~255
+    analogWrite(bSpeed, 100);
+  }
 }
 
 // MAIN
-
 void loop() {
-  getLDR();
   if (checkEdge()){
-    moveForward();
+    moveLeft();
+    timePast = 0;
+    lastTime = millis();
   }
   else{
-    findEdge();
+    moveRight();
+    timePast = millis()-lastTime;
   }
+  Serial.println(analogRead(LDRpin));
 }
