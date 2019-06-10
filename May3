@@ -29,8 +29,9 @@ int led = 4;
 //value for white
 int white=0;
 
-int timePast = 0;
-int lastTime = 0;
+unsigned int timePast = 0;
+unsigned int lastTime = 0;
+unsigned int temp=0;
 
 // SETUP
 
@@ -62,6 +63,7 @@ void initializeLDR(){
     sum+=analogRead(LDRpin);
   }
   white=sum/20;
+  white=400;
 }
 
 // GETS
@@ -74,7 +76,7 @@ void getLDR(){
 // checks to see what colour (black or white) is in front of it
 // outputs 0 for white, 1 for black
 boolean checkEdge(){
-  if (analogRead(LDRpin) < white+20) {
+  if (analogRead(LDRpin) < 400) {
     return 1;
   }
   return 0;
@@ -88,17 +90,17 @@ void moveLeft(){
   digitalWrite(in1, LOW);
   digitalWrite(in2, HIGH);
   // Turn on motor B
-  digitalWrite(in3, HIGH);
-  digitalWrite(in4, LOW);
+  digitalWrite(in3, LOW);
+  digitalWrite(in4, HIGH);
   // Set speed to 200 out of possible range 0~255
-  analogWrite(aSpeed, 1);
+  analogWrite(aSpeed, 80);
   // Set speed to 200 out of possible range 0~255
-  analogWrite(bSpeed, 100);
+  analogWrite(bSpeed, 80);
 }
 
 // turn car right until edge is found
 void moveRight(){
-  if (timePast<700){
+  if (timePast<500){
     // Turn on motor A
     digitalWrite(in1, LOW);
     digitalWrite(in2, HIGH);
@@ -110,7 +112,7 @@ void moveRight(){
     // Set speed to 200 out of possible range 0~255
     analogWrite(bSpeed, 1);
   }
-  else if (timePast<1200){
+  else if (timePast<1300){
     // Turn on motor A
     digitalWrite(in1, LOW);
     digitalWrite(in2, HIGH);
@@ -118,9 +120,9 @@ void moveRight(){
     digitalWrite(in3, HIGH);
     digitalWrite(in4, LOW);
     // Set speed to 200 out of possible range 0~255
-    analogWrite(aSpeed, 100);
+    analogWrite(aSpeed, 80);
     // Set speed to 200 out of possible range 0~255
-    analogWrite(bSpeed, 100);
+    analogWrite(bSpeed, 80);
   }
   else{       // if it's white for a long time, the path may be an L shape and the car has to turn on its own axis (both wheels move opposite sides)
     // Turn on motor A
@@ -130,7 +132,7 @@ void moveRight(){
     digitalWrite(in3, HIGH);
     digitalWrite(in4, LOW);
     // Set speed to 200 out of possible range 0~255
-    analogWrite(aSpeed, 100);
+    analogWrite(aSpeed, 1);
     // Set speed to 200 out of possible range 0~255
     analogWrite(bSpeed, 100);
   }
@@ -139,7 +141,16 @@ void moveRight(){
 // MAIN
 void loop() {
   if (checkEdge()){
-    moveLeft();
+    lastTime = millis();
+    // move left for at least half a second so it can find black tape that's not on straight path and not miss it
+    temp=millis();
+    while (temp-lastTime<500){
+      moveLeft();
+      temp=millis();
+      if (checkEdge()){
+        delay (50);
+      }
+    }
     timePast = 0;
     lastTime = millis();
   }
@@ -147,5 +158,4 @@ void loop() {
     moveRight();
     timePast = millis()-lastTime;
   }
-  Serial.println(analogRead(LDRpin));
 }
