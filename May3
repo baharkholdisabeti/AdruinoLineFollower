@@ -95,12 +95,26 @@ void moveLeft(){
   // Set speed to 200 out of possible range 0~255
   analogWrite(aSpeed, 80);
   // Set speed to 200 out of possible range 0~255
+  analogWrite(bSpeed, 105);
+}
+
+// moves car left more if senses black for a long time
+void moveLeftMore(){
+   // Turn on motor A
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, HIGH);
+  // Turn on motor B
+  digitalWrite(in3, LOW);
+  digitalWrite(in4, HIGH);
+  // Set speed to 200 out of possible range 0~255
+  analogWrite(aSpeed, 150);
+  // Set speed to 200 out of possible range 0~255
   analogWrite(bSpeed, 80);
 }
 
 // turn car right until edge is found
 void moveRight(){
-  if (timePast<500){
+  if (timePast<900){
     // Turn on motor A
     digitalWrite(in1, LOW);
     digitalWrite(in2, HIGH);
@@ -112,20 +126,7 @@ void moveRight(){
     // Set speed to 200 out of possible range 0~255
     analogWrite(bSpeed, 1);
   }
-  else if (timePast<1300){
-    // Turn on motor A
-    digitalWrite(in1, LOW);
-    digitalWrite(in2, HIGH);
-    // Turn on motor B
-    digitalWrite(in3, HIGH);
-    digitalWrite(in4, LOW);
-    // Set speed to 200 out of possible range 0~255
-    analogWrite(aSpeed, 80);
-    // Set speed to 200 out of possible range 0~255
-    analogWrite(bSpeed, 80);
-  }
-  else{       // if it's white for a long time, the path may be an L shape and the car has to turn on its own axis (both wheels move opposite sides)
-    // Turn on motor A
+  else if (timePast<2500){       // if it's white for a long time, the path may be an arrow shape and the car has to turn backwards on 1 wheel
     digitalWrite(in1, HIGH);
     digitalWrite(in2, LOW);
     // Turn on motor B
@@ -136,6 +137,18 @@ void moveRight(){
     // Set speed to 200 out of possible range 0~255
     analogWrite(bSpeed, 100);
   }
+  else{       // if it's white for a long time, the path may be an L shape and the car has to turn on its own axis (both wheels move opposite sides)
+    // Turn on motor A
+    digitalWrite(in1, HIGH);
+    digitalWrite(in2, LOW);
+    // Turn on motor B
+    digitalWrite(in3, HIGH);
+    digitalWrite(in4, LOW);
+    // Set speed to 200 out of possible range 0~255
+    analogWrite(aSpeed, 80);
+    // Set speed to 200 out of possible range 0~255
+    analogWrite(bSpeed, 80);
+  }
 }
 
 // MAIN
@@ -144,11 +157,21 @@ void loop() {
     lastTime = millis();
     // move left for at least half a second so it can find black tape that's not on straight path and not miss it
     temp=millis();
-    while (temp-lastTime<500){
+    while (temp-lastTime<600){
       moveLeft();
       temp=millis();
-      if (checkEdge()){
-        delay (50);
+      //if (checkEdge()){
+       // delay (50);
+      //}
+    }
+    
+    if (checkEdge()){
+      lastTime = millis();
+      temp = millis();
+      while (temp - lastTime<800)
+      {
+        moveLeftMore();
+        temp=millis();
       }
     }
     timePast = 0;
@@ -158,4 +181,5 @@ void loop() {
     moveRight();
     timePast = millis()-lastTime;
   }
+  //Serial.println(analogRead(LDRpin));
 }
